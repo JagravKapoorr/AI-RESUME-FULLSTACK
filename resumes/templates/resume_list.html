@@ -1,0 +1,385 @@
+{% extends 'base.html' %}
+
+{% block title %}My Resumes - Django App{% endblock %}
+
+{% block extra_css %}
+<style>
+    .list-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+
+    .header-section {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .page-title {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .upload-btn {
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
+    }
+
+    .upload-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px -1px rgba(99, 102, 241, 0.5);
+    }
+
+    /* Resume Grid */
+    .resume-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .resume-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 2rem;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .resume-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        border-color: var(--primary-color);
+    }
+
+    .resume-header {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .resume-file-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 1.5rem;
+        flex-shrink: 0;
+    }
+
+    .resume-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .resume-filename {
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 0.5rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .resume-date {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .status-completed {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+    }
+
+    .status-processing {
+        background: rgba(245, 158, 11, 0.1);
+        color: var(--warning);
+    }
+
+    .status-failed {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger);
+    }
+
+    .status-pending {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+    }
+
+    /* Stats */
+    .resume-stats {
+        display: flex;
+        gap: 1.5rem;
+        padding: 1rem 0;
+        border-top: 1px solid var(--border-color);
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 1rem;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 0.25rem;
+    }
+
+    /* Actions */
+    .card-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .btn {
+        flex: 1;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-view {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .btn-view:hover {
+        background: var(--primary-dark);
+    }
+
+    .btn-delete {
+        background: transparent;
+        border: 2px solid var(--danger);
+        color: var(--danger);
+    }
+
+    .btn-delete:hover {
+        background: var(--danger);
+        color: white;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 5rem 2rem;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+    }
+
+    .empty-icon {
+        font-size: 5rem;
+        color: var(--text-secondary);
+        opacity: 0.5;
+        margin-bottom: 2rem;
+    }
+
+    .empty-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+
+    .empty-description {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .list-container {
+            padding: 1rem;
+        }
+
+        .header-section {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .upload-btn {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .resume-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .resume-stats {
+            flex-direction: column;
+            gap: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="list-container">
+    <!-- Header -->
+    <div class="header-section">
+        <h1 class="page-title">My Resumes</h1>
+        <a href="{% url 'resumes:upload_resume' %}" class="upload-btn">
+            <i class="fas fa-plus-circle"></i>
+            Upload New Resume
+        </a>
+    </div>
+
+    {% if resumes %}
+    <!-- Resume Grid -->
+    <div class="resume-grid">
+        {% for resume in resumes %}
+        <div class="resume-card">
+            <!-- Header -->
+            <div class="resume-header">
+                <div class="resume-file-icon">
+                    <i class="fas fa-file-{% if resume.file_extension == 'pdf' %}pdf{% else %}word{% endif %}"></i>
+                </div>
+                <div class="resume-info">
+                    <div class="resume-filename" title="{{ resume.original_filename }}">
+                        {{ resume.original_filename }}
+                    </div>
+                    <div class="resume-date">
+                        <i class="fas fa-calendar"></i>
+                        {{ resume.created_at|timesince }} ago
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status -->
+            <span class="status-badge status-{{ resume.status }}">
+                {% if resume.status == 'completed' %}
+                <i class="fas fa-check-circle"></i> Parsed Successfully
+                {% elif resume.status == 'processing' %}
+                <i class="fas fa-spinner fa-spin"></i> Processing...
+                {% elif resume.status == 'failed' %}
+                <i class="fas fa-exclamation-circle"></i> Failed
+                {% else %}
+                <i class="fas fa-clock"></i> Pending
+                {% endif %}
+            </span>
+
+            <!-- Stats (only if completed) -->
+            {% if resume.status == 'completed' %}
+            <div class="resume-stats">
+                <div class="stat-item">
+                    <div class="stat-value">{{ resume.skill_count }}</div>
+                    <div class="stat-label">Skills</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value">
+                        {% if resume.experience_years %}
+                        {{ resume.experience_years }}
+                        {% else %}
+                        -
+                        {% endif %}
+                    </div>
+                    <div class="stat-label">Yrs Exp</div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Error Message -->
+            {% if resume.status == 'failed' and resume.error_message %}
+            <div style="padding: 0.75rem; background: rgba(239, 68, 68, 0.1); border-radius: 6px; margin-bottom: 1rem;">
+                <p style="color: var(--danger); font-size: 0.85rem; margin: 0;">
+                    {{ resume.error_message|truncatewords:15 }}
+                </p>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="card-actions">
+                <a href="{% url 'resumes:resume_detail' resume.pk %}" class="btn btn-view">
+                    <i class="fas fa-eye"></i>
+                    View Details
+                </a>
+                <a href="{% url 'resumes:delete_resume' resume.pk %}" class="btn btn-delete">
+                    <i class="fas fa-trash"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="empty-state">
+        <div class="empty-icon">
+            <i class="fas fa-file-upload"></i>
+        </div>
+        <h2 class="empty-title">No Resumes Yet</h2>
+        <p class="empty-description">
+            Upload your first resume and let AI extract your information automatically
+        </p>
+        <a href="{% url 'resumes:upload_resume' %}" class="upload-btn">
+            <i class="fas fa-upload"></i>
+            Upload Your Resume
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Auto-refresh for processing resumes
+    const processingResumes = document.querySelectorAll('.status-processing');
+
+    if (processingResumes.length > 0) {
+        // Reload page every 5 seconds if there are processing resumes
+        setTimeout(() => {
+            location.reload();
+        }, 5000);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,410 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - ResumeIQ{% endblock %}
+
+{% block extra_css %}
+<style>
+    .register-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(100vh - 140px);
+        padding: 2rem 1rem;
+    }
+
+    .register-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 3rem;
+        max-width: 500px;
+        width: 100%;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    .register-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .register-header h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+
+    .register-header p {
+        color: var(--text-secondary);
+        font-size: 0.95rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+        display: block;
+        color: var(--text-primary);
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+    }
+
+    .form-group label i {
+        margin-right: 0.5rem;
+        color: var(--primary-color);
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        background: rgba(15, 23, 42, 0.5);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        background: rgba(15, 23, 42, 0.7);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .form-input::placeholder {
+        color: var(--text-secondary);
+        opacity: 0.6;
+    }
+
+    .form-select {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        background: rgba(15, 23, 42, 0.5);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+        font-family: 'Inter', sans-serif;
+        cursor: pointer;
+    }
+
+    .form-select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        background: rgba(15, 23, 42, 0.7);
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    }
+
+    .form-select option {
+        background: var(--card-bg);
+        color: var(--text-primary);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+        box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px -1px rgba(99, 102, 241, 0.5);
+    }
+
+    .submit-btn:active {
+        transform: translateY(0);
+    }
+
+    .form-footer {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .form-footer p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .form-footer a {
+        color: var(--primary-light);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s ease;
+    }
+
+    .form-footer a:hover {
+        color: var(--primary-color);
+        text-decoration: underline;
+    }
+
+    .password-strength {
+        height: 4px;
+        background: var(--border-color);
+        border-radius: 2px;
+        margin-top: 0.5rem;
+        overflow: hidden;
+        display: none;
+    }
+
+    .password-strength-bar {
+        height: 100%;
+        width: 0;
+        transition: all 0.3s ease;
+        border-radius: 2px;
+    }
+
+    .password-strength.active {
+        display: block;
+    }
+
+    .role-card {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 0.75rem;
+    }
+
+    .role-card:hover {
+        border-color: var(--primary-color);
+        background: rgba(99, 102, 241, 0.05);
+    }
+
+    .role-card.selected {
+        border-color: var(--primary-color);
+        background: rgba(99, 102, 241, 0.1);
+    }
+
+    .role-card input[type="radio"] {
+        margin-right: 1rem;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+    }
+
+    .role-info {
+        flex: 1;
+    }
+
+    .role-info h4 {
+        color: var(--text-primary);
+        margin-bottom: 0.25rem;
+        font-size: 1rem;
+    }
+
+    .role-info p {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+        margin: 0;
+    }
+
+    .role-icon {
+        font-size: 2rem;
+        margin-left: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .register-card {
+            padding: 2rem 1.5rem;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+
+        .register-header h2 {
+            font-size: 1.75rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <div class="register-card">
+        <div class="register-header">
+            <h2>Create Account</h2>
+            <p>Join us today and start your journey</p>
+        </div>
+
+        <form method="POST" id="registerForm">
+            {% csrf_token %}
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="first_name">
+                        <i class="fas fa-user"></i>First Name
+                    </label>
+                    <input type="text" id="first_name" name="first_name" class="form-input" placeholder="John" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="last_name">
+                        <i class="fas fa-user"></i>Last Name
+                    </label>
+                    <input type="text" id="last_name" name="last_name" class="form-input" placeholder="Doe" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">
+                    <i class="fas fa-envelope"></i>Email Address
+                </label>
+                <input type="email" id="email" name="email" class="form-input" placeholder="john.doe@example.com"
+                    required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">
+                    <i class="fas fa-lock"></i>Password
+                </label>
+                <input type="password" id="password" name="password" class="form-input"
+                    placeholder="Enter a strong password" required>
+                <div class="password-strength" id="passwordStrength">
+                    <div class="password-strength-bar" id="passwordStrengthBar"></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>
+                    <i class="fas fa-user-tag"></i>Select Your Role
+                </label>
+
+                <label class="role-card" onclick="selectRole('candidate')">
+                    <input type="radio" name="role" value="candidate" id="role_candidate" required>
+                    <div class="role-info">
+                        <h4>Candidate</h4>
+                        <p>Looking for job opportunities</p>
+                    </div>
+                    <div class="role-icon">💼</div>
+                </label>
+
+                <label class="role-card" onclick="selectRole('recruiter')">
+                    <input type="radio" name="role" value="recruiter" id="role_recruiter" required>
+                    <div class="role-info">
+                        <h4>Recruiter</h4>
+                        <p>Hiring talented professionals</p>
+                    </div>
+                    <div class="role-icon">🎯</div>
+                </label>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                <i class="fas fa-user-plus"></i> Create Account
+            </button>
+
+            <div class="form-footer">
+                <p>Already have an account? <a href="{% url 'accounts:login' %}">Sign in here</a></p>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Role selection
+    function selectRole(role) {
+        const cards = document.querySelectorAll('.role-card');
+        cards.forEach(card => card.classList.remove('selected'));
+
+        const selectedCard = document.getElementById('role_' + role).closest('.role-card');
+        selectedCard.classList.add('selected');
+    }
+
+    // Password strength indicator
+    const passwordInput = document.getElementById('password');
+    const strengthDiv = document.getElementById('passwordStrength');
+    const strengthBar = document.getElementById('passwordStrengthBar');
+
+    passwordInput.addEventListener('input', function () {
+        const password = this.value;
+
+        if (password.length === 0) {
+            strengthDiv.classList.remove('active');
+            return;
+        }
+
+        strengthDiv.classList.add('active');
+
+        let strength = 0;
+
+        // Length check
+        if (password.length >= 8) strength += 25;
+        if (password.length >= 12) strength += 25;
+
+        // Character variety
+        if (/[a-z]/.test(password)) strength += 12.5;
+        if (/[A-Z]/.test(password)) strength += 12.5;
+        if (/[0-9]/.test(password)) strength += 12.5;
+        if (/[^a-zA-Z0-9]/.test(password)) strength += 12.5;
+
+        strengthBar.style.width = strength + '%';
+
+        if (strength <= 25) {
+            strengthBar.style.background = '#ef4444';
+        } else if (strength <= 50) {
+            strengthBar.style.background = '#f59e0b';
+        } else if (strength <= 75) {
+            strengthBar.style.background = '#3b82f6';
+        } else {
+            strengthBar.style.background = '#10b981';
+        }
+    });
+
+    // Form validation feedback
+    const form = document.getElementById('registerForm');
+
+    form.addEventListener('submit', function (e) {
+        const roleSelected = document.querySelector('input[name="role"]:checked');
+
+        if (!roleSelected) {
+            e.preventDefault();
+            alert('Please select a role');
+            return;
+        }
+
+        // Add loading state to button
+        const submitBtn = form.querySelector('.submit-btn');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+        submitBtn.disabled = true;
+    });
+
+    // Auto-select role card when radio is clicked
+    document.querySelectorAll('input[name="role"]').forEach(radio => {
+        radio.addEventListener('change', function () {
+            const cards = document.querySelectorAll('.role-card');
+            cards.forEach(card => card.classList.remove('selected'));
+            this.closest('.role-card').classList.add('selected');
+        });
+    });
+</script>
+{% endblock %}

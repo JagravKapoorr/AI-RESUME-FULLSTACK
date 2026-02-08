@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Resume - Django App{% endblock %}
+
+{% block extra_css %}
+<style>
+    .confirm-container {
+        max-width: 600px;
+        margin: 3rem auto;
+        padding: 2rem;
+    }
+
+    .confirm-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 3rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        text-align: center;
+    }
+
+    .warning-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 2rem;
+        background: rgba(239, 68, 68, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: var(--danger);
+        animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        50% {
+            transform: scale(1.05);
+            opacity: 0.8;
+        }
+    }
+
+    .confirm-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+
+    .confirm-message {
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        line-height: 1.7;
+        margin-bottom: 2rem;
+    }
+
+    /* File Info */
+    .file-info {
+        background: rgba(15, 23, 42, 0.3);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        text-align: left;
+    }
+
+    .file-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 0;
+    }
+
+    .file-info-row:not(:last-child) {
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 0.5rem;
+        padding-bottom: 1rem;
+    }
+
+    .info-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .info-value {
+        color: var(--text-primary);
+        font-weight: 600;
+    }
+
+    /* Warning Box */
+    .warning-box {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+        text-align: left;
+    }
+
+    .warning-box-title {
+        color: var(--danger);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .warning-box-list {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-left: 1.5rem;
+    }
+
+    .warning-box-list li {
+        margin-bottom: 0.5rem;
+    }
+
+    /* Action Buttons */
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn-action {
+        flex: 1;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-danger {
+        background: var(--danger);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px -1px rgba(239, 68, 68, 0.5);
+    }
+
+    .btn-cancel {
+        background: transparent;
+        border: 2px solid var(--border-color);
+        color: var(--text-primary);
+    }
+
+    .btn-cancel:hover {
+        border-color: var(--primary-color);
+        background: rgba(99, 102, 241, 0.1);
+    }
+
+    @media (max-width: 768px) {
+        .confirm-container {
+            padding: 1rem;
+            margin: 2rem auto;
+        }
+
+        .confirm-card {
+            padding: 2rem 1.5rem;
+        }
+
+        .action-buttons {
+            flex-direction: column-reverse;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="confirm-container">
+    <div class="confirm-card">
+        <!-- Warning Icon -->
+        <div class="warning-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+
+        <!-- Title -->
+        <h1 class="confirm-title">Delete Resume?</h1>
+
+        <!-- Message -->
+        <p class="confirm-message">
+            Are you sure you want to delete this resume? This action cannot be undone.
+        </p>
+
+        <!-- File Info -->
+        <div class="file-info">
+            <div class="file-info-row">
+                <span class="info-label">Filename</span>
+                <span class="info-value">{{ resume.original_filename }}</span>
+            </div>
+            <div class="file-info-row">
+                <span class="info-label">Uploaded</span>
+                <span class="info-value">{{ resume.created_at|date:"M d, Y" }}</span>
+            </div>
+            <div class="file-info-row">
+                <span class="info-label">Status</span>
+                <span class="info-value" style="text-transform: capitalize;">{{ resume.status }}</span>
+            </div>
+            {% if resume.status == 'completed' %}
+            <div class="file-info-row">
+                <span class="info-label">Skills Found</span>
+                <span class="info-value">{{ resume.skill_count }} skills</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Warning Box -->
+        <div class="warning-box">
+            <div class="warning-box-title">
+                <i class="fas fa-info-circle"></i>
+                What will be deleted:
+            </div>
+            <ul class="warning-box-list">
+                <li>The uploaded resume file</li>
+                <li>All parsed data from this resume</li>
+                <li>Any associated metadata</li>
+            </ul>
+        </div>
+
+        <!-- Actions -->
+        <form method="POST">
+            {% csrf_token %}
+            <div class="action-buttons">
+                <a href="{% url 'resumes:resume_list' %}" class="btn-action btn-cancel">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+                <button type="submit" class="btn-action btn-danger" id="deleteBtn">
+                    <i class="fas fa-trash"></i>
+                    Yes, Delete Resume
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Prevent accidental double-click
+    const deleteBtn = document.getElementById('deleteBtn');
+    const form = deleteBtn.closest('form');
+
+    form.addEventListener('submit', function (e) {
+        deleteBtn.disabled = true;
+        deleteBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+    });
+
+    // Optional: Add confirmation dialog
+    deleteBtn.addEventListener('click', function (e) {
+        const confirmed = confirm('Are you absolutely sure? This cannot be undone.');
+        if (!confirmed) {
+            e.preventDefault();
+            return false;
+        }
+    });
+</script>
+{% endblock %}

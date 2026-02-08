@@ -1,0 +1,434 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload Resume - Django App{% endblock %}
+
+{% block extra_css %}
+<style>
+    .upload-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+
+    .upload-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 3rem;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    .upload-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .upload-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-header p {
+        color: var(--text-secondary);
+        font-size: 1rem;
+    }
+
+    /* File Upload Area */
+    .file-upload-area {
+        border: 2px dashed var(--border-color);
+        border-radius: 12px;
+        padding: 3rem 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        margin-bottom: 1.5rem;
+    }
+
+    .file-upload-area:hover {
+        border-color: var(--primary-color);
+        background: rgba(99, 102, 241, 0.05);
+    }
+
+    .file-upload-area.dragover {
+        border-color: var(--primary-color);
+        background: rgba(99, 102, 241, 0.1);
+    }
+
+    .upload-icon {
+        font-size: 4rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+
+    .upload-text h3 {
+        color: var(--text-primary);
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .upload-text p {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    #resumeFile {
+        display: none;
+    }
+
+    .file-info {
+        display: none;
+        padding: 1rem;
+        background: rgba(99, 102, 241, 0.1);
+        border: 1px solid var(--primary-color);
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .file-info.active {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .file-icon {
+        font-size: 2rem;
+        color: var(--primary-color);
+    }
+
+    .file-details {
+        flex: 1;
+    }
+
+    .file-name {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .file-size {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+    }
+
+    .remove-file {
+        background: var(--danger);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .remove-file:hover {
+        background: #dc2626;
+    }
+
+    /* Submit Button */
+    .submit-btn {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
+    }
+
+    .submit-btn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px -1px rgba(99, 102, 241, 0.5);
+    }
+
+    .submit-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    /* Info Box */
+    .info-box {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .info-box h4 {
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .info-box ul {
+        color: var(--text-secondary);
+        margin-left: 1.5rem;
+        font-size: 0.9rem;
+    }
+
+    /* Existing Resumes */
+    .existing-resumes {
+        margin-top: 3rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .existing-resumes h3 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+
+    .resume-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        background: rgba(15, 23, 42, 0.3);
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+        transition: all 0.3s ease;
+    }
+
+    .resume-item:hover {
+        background: rgba(15, 23, 42, 0.5);
+    }
+
+    .resume-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+
+    .resume-info {
+        flex: 1;
+    }
+
+    .resume-name {
+        color: var(--text-primary);
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+    }
+
+    .resume-date {
+        color: var(--text-secondary);
+        font-size: 0.85rem;
+    }
+
+    .view-btn {
+        padding: 0.5rem 1rem;
+        background: var(--primary-color);
+        color: white;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+    }
+
+    .view-btn:hover {
+        background: var(--primary-dark);
+    }
+
+    @media (max-width: 768px) {
+        .upload-card {
+            padding: 2rem 1.5rem;
+        }
+
+        .file-upload-area {
+            padding: 2rem 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="upload-container">
+    <div class="upload-card">
+        <div class="upload-header">
+            <h1>Upload Your Resume</h1>
+            <p>Let our AI extract your information automatically</p>
+        </div>
+
+        <!-- Info Box -->
+        <div class="info-box">
+            <h4>
+                <i class="fas fa-info-circle"></i>
+                What happens after upload?
+            </h4>
+            <ul>
+                <li>AI automatically extracts your information</li>
+                <li>Skills, experience, and education are parsed</li>
+                <li>Your profile is auto-filled with the data</li>
+                <li>Takes about 10-15 seconds to process</li>
+            </ul>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" id="uploadForm">
+            {% csrf_token %}
+
+            <!-- File Upload Area -->
+            <div class="file-upload-area" id="uploadArea">
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <div class="upload-text">
+                    <h3>Click to upload or drag and drop</h3>
+                    <p>PDF or DOCX (Max 5MB)</p>
+                </div>
+                <input type="file" id="resumeFile" name="resume" accept=".pdf,.docx,.doc">
+            </div>
+
+            <!-- File Info (shown after selection) -->
+            <div class="file-info" id="fileInfo">
+                <div class="file-icon">
+                    <i class="fas fa-file-alt"></i>
+                </div>
+                <div class="file-details">
+                    <div class="file-name" id="fileName"></div>
+                    <div class="file-size" id="fileSize"></div>
+                </div>
+                <button type="button" class="remove-file" id="removeFile">
+                    <i class="fas fa-times"></i> Remove
+                </button>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="submit-btn" id="submitBtn" disabled>
+                <i class="fas fa-upload"></i> Upload and Parse Resume
+            </button>
+        </form>
+
+        <!-- Existing Resumes -->
+        {% if existing_resumes %}
+        <div class="existing-resumes">
+            <h3>Your Recent Resumes</h3>
+            {% for resume in existing_resumes %}
+            <div class="resume-item">
+                <div class="resume-icon">
+                    <i class="fas fa-file-pdf"></i>
+                </div>
+                <div class="resume-info">
+                    <div class="resume-name">{{ resume.original_filename }}</div>
+                    <div class="resume-date">
+                        Uploaded {{ resume.created_at|timesince }} ago
+                        {% if resume.status == 'completed' %}
+                        <span style="color: var(--success);">✓ Parsed</span>
+                        {% elif resume.status == 'failed' %}
+                        <span style="color: var(--danger);">✗ Failed</span>
+                        {% elif resume.status == 'processing' %}
+                        <span style="color: var(--warning);">⏳ Processing</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <a href="{% url 'resumes:resume_detail' resume.pk %}" class="view-btn">
+                    <i class="fas fa-eye"></i> View
+                </a>
+            </div>
+            {% endfor %}
+            <a href="{% url 'resumes:resume_list' %}"
+                style="color: var(--primary-light); margin-top: 1rem; display: inline-block;">
+                View all resumes →
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('resumeFile');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const removeBtn = document.getElementById('removeFile');
+    const submitBtn = document.getElementById('submitBtn');
+    const uploadForm = document.getElementById('uploadForm');
+
+    // Click to upload
+    uploadArea.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    // File selected
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            displayFileInfo(file);
+        }
+    });
+
+    // Drag and drop
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            // Validate file type
+            const ext = file.name.split('.').pop().toLowerCase();
+            if (['pdf', 'docx', 'doc'].includes(ext)) {
+                fileInput.files = e.dataTransfer.files;
+                displayFileInfo(file);
+            } else {
+                alert('Please upload a PDF or DOCX file');
+            }
+        }
+    });
+
+    // Display file info
+    function displayFileInfo(file) {
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        fileInfo.classList.add('active');
+        uploadArea.style.display = 'none';
+        submitBtn.disabled = false;
+    }
+
+    // Remove file
+    removeBtn.addEventListener('click', () => {
+        fileInput.value = '';
+        fileInfo.classList.remove('active');
+        uploadArea.style.display = 'block';
+        submitBtn.disabled = true;
+    });
+
+    // Format file size
+    function formatFileSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+        return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    // Form submission
+    uploadForm.addEventListener('submit', (e) => {
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading and Parsing...';
+        submitBtn.disabled = true;
+    });
+</script>
+{% endblock %}

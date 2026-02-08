@@ -1,0 +1,408 @@
+{% extends 'base.html' %}
+
+{% block title %}Resume Details - Django App{% endblock %}
+
+{% block extra_css %}
+<style>
+    .detail-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--primary-light);
+        text-decoration: none;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .back-link:hover {
+        color: var(--primary-color);
+        gap: 0.75rem;
+    }
+
+    .resume-header {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(236, 72, 153, 0.1));
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .resume-title {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+
+    .resume-meta {
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+        color: var(--text-secondary);
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .status-completed {
+        background: rgba(16, 185, 129, 0.1);
+        color: var(--success);
+    }
+
+    .status-failed {
+        background: rgba(239, 68, 68, 0.1);
+        color: var(--danger);
+    }
+
+    /* Data Grid */
+    .data-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .data-card {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 2rem;
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .card-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .info-item {
+        margin-bottom: 1rem;
+    }
+
+    .info-label {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+        color: var(--text-primary);
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    /* Skills */
+    .skills-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .skill-tag {
+        padding: 0.5rem 1rem;
+        background: rgba(99, 102, 241, 0.1);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        border-radius: 50px;
+        color: var(--primary-light);
+        font-size: 0.9rem;
+    }
+
+    /* List Items */
+    .list-item {
+        padding: 1rem;
+        background: rgba(15, 23, 42, 0.3);
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+    }
+
+    .list-item p {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* Actions */
+    .actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    .btn-action {
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        color: white;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px -1px rgba(99, 102, 241, 0.5);
+    }
+
+    .btn-danger {
+        background: var(--danger);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #dc2626;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--text-secondary);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+    <a href="{% url 'resumes:resume_list' %}" class="back-link">
+        <i class="fas fa-arrow-left"></i>
+        Back to Resumes
+    </a>
+
+    <!-- Header -->
+    <div class="resume-header">
+        <h1 class="resume-title">{{ resume.original_filename }}</h1>
+        <div class="resume-meta">
+            <div class="meta-item">
+                <i class="fas fa-calendar"></i>
+                Uploaded {{ resume.created_at|date:"M d, Y" }}
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-clock"></i>
+                {{ resume.created_at|timesince }} ago
+            </div>
+            <div class="meta-item">
+                {% if resume.status == 'completed' %}
+                <span class="status-badge status-completed">
+                    <i class="fas fa-check-circle"></i> Parsed Successfully
+                </span>
+                {% elif resume.status == 'failed' %}
+                <span class="status-badge status-failed">
+                    <i class="fas fa-exclamation-circle"></i> Parsing Failed
+                </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if resume.status == 'completed' and parsed_data %}
+    <!-- Personal Information -->
+    <div class="data-grid">
+        <div class="data-card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h2 class="card-title">Personal Info</h2>
+            </div>
+
+            {% if parsed_data.name %}
+            <div class="info-item">
+                <div class="info-label">Full Name</div>
+                <div class="info-value">{{ parsed_data.name }}</div>
+            </div>
+            {% endif %}
+
+            {% if parsed_data.email %}
+            <div class="info-item">
+                <div class="info-label">Email</div>
+                <div class="info-value">{{ parsed_data.email }}</div>
+            </div>
+            {% endif %}
+
+            {% if parsed_data.phone %}
+            <div class="info-item">
+                <div class="info-label">Phone</div>
+                <div class="info-value">{{ parsed_data.phone }}</div>
+            </div>
+            {% endif %}
+
+            {% if parsed_data.location %}
+            <div class="info-item">
+                <div class="info-label">Location</div>
+                <div class="info-value">{{ parsed_data.location }}</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="data-card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h2 class="card-title">Quick Stats</h2>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Total Experience</div>
+                <div class="info-value">
+                    {% if parsed_data.total_experience_years %}
+                    {{ parsed_data.total_experience_years }} years
+                    {% else %}
+                    Not specified
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Skills Count</div>
+                <div class="info-value">{{ resume.skill_count }} skills</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">Education Level</div>
+                <div class="info-value">
+                    {% if resume.education_level %}
+                    {{ resume.education_level }}
+                    {% else %}
+                    Not specified
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    {% if parsed_data.summary %}
+    <div class="data-card" style="margin-bottom: 2rem;">
+        <div class="card-header">
+            <div class="card-icon">
+                <i class="fas fa-align-left"></i>
+            </div>
+            <h2 class="card-title">Professional Summary</h2>
+        </div>
+        <p style="color: var(--text-secondary); line-height: 1.7;">{{ parsed_data.summary }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Skills -->
+    {% if parsed_data.skills %}
+    <div class="data-card" style="margin-bottom: 2rem;">
+        <div class="card-header">
+            <div class="card-icon">
+                <i class="fas fa-code"></i>
+            </div>
+            <h2 class="card-title">Skills ({{ parsed_data.skills|length }})</h2>
+        </div>
+        <div class="skills-grid">
+            {% for skill in parsed_data.skills %}
+            <span class="skill-tag">{{ skill }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Experience -->
+    {% if parsed_data.experience %}
+    <div class="data-card" style="margin-bottom: 2rem;">
+        <div class="card-header">
+            <div class="card-icon">
+                <i class="fas fa-briefcase"></i>
+            </div>
+            <h2 class="card-title">Work Experience</h2>
+        </div>
+        {% for exp in parsed_data.experience %}
+        <div class="list-item">
+            <p>{{ exp }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Education -->
+    {% if parsed_data.education %}
+    <div class="data-card" style="margin-bottom: 2rem;">
+        <div class="card-header">
+            <div class="card-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <h2 class="card-title">Education</h2>
+        </div>
+        {% for edu in parsed_data.education %}
+        <div class="list-item">
+            <p>{{ edu }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% elif resume.status == 'failed' %}
+    <!-- Error State -->
+    <div class="data-card">
+        <div class="empty-state">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3 style="color: var(--text-primary); margin-bottom: 1rem;">Parsing Failed</h3>
+            <p>{{ resume.error_message }}</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Actions -->
+    <div class="actions">
+        <a href="{% url 'accounts:dashboard' %}" class="btn-action btn-primary">
+            <i class="fas fa-home"></i>
+            Back to Dashboard
+        </a>
+        <a href="{% url 'resumes:delete_resume' resume.pk %}" class="btn-action btn-danger">
+            <i class="fas fa-trash"></i>
+            Delete Resume
+        </a>
+    </div>
+</div>
+{% endblock %}
